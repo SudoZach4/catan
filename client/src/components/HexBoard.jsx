@@ -418,6 +418,7 @@ function HexBoard({
               
               {/* Pattern overlay */}
               <path
+                className="hex-pattern-overlay"
                 d={hexPath(pos.x, pos.y, HEX_SIZE - 2)}
                 fill={getTerrainPattern(hex.terrain)}
                 opacity="0.85"
@@ -433,7 +434,7 @@ function HexBoard({
               
               {/* Number token */}
               {hex.number && (
-                <g>
+                <g className="hex-token">
                   <circle 
                     cx={pos.x} 
                     cy={pos.y} 
@@ -480,7 +481,7 @@ function HexBoard({
               
               {/* Robber */}
               {isRobberHere && (
-                <g className="robber">
+                <g className="robber robber-appear">
                   <ellipse 
                     cx={pos.x} 
                     cy={pos.y} 
@@ -522,9 +523,10 @@ function HexBoard({
 
         {/* Roads - rendered separately from clickable areas */}
         {roads.map(({ key, owner, v1, v2 }) => (
-          <g key={`road-${key}`}>
+          <g key={`road-${key}`} className={`road-group ${owner === myIndex ? 'road-owner' : ''}`}>
             {/* Black outline behind the road for visibility */}
             <line
+              className="road-shadow"
               x1={v1.x}
               y1={v1.y}
               x2={v2.x}
@@ -535,6 +537,7 @@ function HexBoard({
             />
             {/* Colored road */}
             <line
+              className="road-line"
               x1={v1.x}
               y1={v1.y}
               x2={v2.x}
