@@ -22,5 +22,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_SERVER_URL
-        sync: false  # You'll need to set this after deploying the server
-
+        fromService:
+          name: catan-server
+          type: web
+          property: url
