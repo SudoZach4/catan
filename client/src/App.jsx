@@ -186,10 +186,10 @@ function App() {
   // ============================================================================
   
   /** Create a new game room as the host */
-  const handleCreateGame = useCallback((playerName, isExtended = false, enableSpecialBuild = true) => {
+  const handleCreateGame = useCallback((playerName, isExtended = false, enableSpecialBuild = true, expansions = []) => {
     if (!socket) return;
     
-    socket.emit('createGame', { playerName, isExtended, enableSpecialBuild }, (response) => {
+    socket.emit('createGame', { playerName, isExtended, enableSpecialBuild, expansions }, (response) => {
       if (response.success) {
         setGameCode(response.gameCode);
         setPlayerId(response.playerId);
@@ -257,44 +257,14 @@ function App() {
     );
   }
 
-  // Connecting to server - show enhanced loading screen
+  // Connecting to server - show loading screen
   if (!connected) {
     return (
       <div className="loading-screen">
         <div className="loading-content">
           <h1>CATAN</h1>
-          <div className="connection-stages">
-            <div className={`stage ${connectionStatus === 'initializing' || connectionStatus === 'connecting' || connectionStatus === 'connected' ? 'active' : ''} ${connectionStatus === 'connected' ? 'completed' : ''}`}>
-              <div className="stage-icon">⚙️</div>
-              <div className="stage-label">Initializing</div>
-            </div>
-            <div className={`stage ${connectionStatus === 'connecting' || connectionStatus === 'connected' ? 'active' : ''} ${connectionStatus === 'connected' ? 'completed' : ''}`}>
-              <div className="stage-icon">🌐</div>
-              <div className="stage-label">Connecting</div>
-            </div>
-            <div className={`stage ${connectionStatus === 'connected' ? 'active completed' : ''}`}>
-              <div className="stage-icon">✨</div>
-              <div className="stage-label">Ready</div>
-            </div>
-          </div>
-          
-          <p className="connection-status">
-            {connectionStatus === 'initializing' && 'Starting up...'}
-            {connectionStatus === 'connecting' && 'Connecting to server...'}
-            {connectionStatus === 'connected' && 'Connected!'}
-            {connectionStatus === 'failed' && `Connection failed. Attempting to reconnect... (${connectionAttempts}/10)`}
-          </p>
-          
+          <p>Connecting to server...</p>
           <div className="loading-spinner"></div>
-          
-          {connectionStatus === 'failed' && (
-            <button 
-              className="retry-btn"
-              onClick={() => window.location.reload()}
-            >
-              Retry Connection
-            </button>
-          )}
         </div>
       </div>
     );
