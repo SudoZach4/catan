@@ -32,6 +32,7 @@ function App() {
   
   const [socket, setSocket] = useState(null);           // Socket.io connection
   const [connected, setConnected] = useState(false);     // Connection status
+  const [connectionStatus, setConnectionStatus] = useState('initializing'); // 'initializing', 'connecting', 'connected', 'failed'
   const [gameState, setGameState] = useState(null);      // Current game state from server
   const [playerId, setPlayerId] = useState(null);        // This player's unique ID
   const [gameCode, setGameCode] = useState(null);        // Current game room code
@@ -39,17 +40,26 @@ function App() {
   const [chatMessages, setChatMessages] = useState([]);  // Chat message history
   const [notifications, setNotifications] = useState([]); // Toast notifications
   const [serverFull, setServerFull] = useState(false);   // Server capacity flag
+  const [connectionAttempts, setConnectionAttempts] = useState(0); // Track connection attempts
 
   // ============================================================================
   // SOCKET CONNECTION & EVENT HANDLERS
   // ============================================================================
   
   useEffect(() => {
-    const newSocket = io(SERVER_URL);
+    const newSocket = io(SERVER_URL, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+      transports: ['websocket', 'polling']
+    });
     
     newSocket.on('connect', () => {
       console.log('Connected to server');
       setConnected(true);
+      setConnectionStatus('connected');
+      setConnectionAttempts(0);
       setServerFull(false);
       
       // Try to reconnect to existing game
@@ -68,15 +78,23 @@ function App() {
       }
     });
     
+    newSocket.on('connect_error', () => {
+      console.log('Connection error');
+      setConnectionStatus('failed');
+      setConnectionAttempts(prev => prev + 1);
+    });
+    
     newSocket.on('disconnect', () => {
       console.log('Disconnected from server');
       setConnected(false);
+      setConnectionStatus('connecting');
     });
     
     newSocket.on('serverFull', ({ message }) => {
       console.log('Server is full:', message);
       setServerFull(true);
       setConnected(false);
+      setConnectionStatus('failed');
     });
     
     newSocket.on('gameState', (state) => {
@@ -120,6 +138,7 @@ function App() {
     });
     
     setSocket(newSocket);
+    setConnectionStatus('connecting');
     
     return () => {
       newSocket.close();
@@ -238,14 +257,44 @@ function App() {
     );
   }
 
-  // Connecting to server - show loading screen
+  // Connecting to server - show enhanced loading screen
   if (!connected) {
     return (
       <div className="loading-screen">
         <div className="loading-content">
           <h1>CATAN</h1>
-          <p>Connecting to server...</p>
+          <div className="connection-stages">
+            <div className={`stage ${connectionStatus === 'initializing' || connectionStatus === 'connecting' || connectionStatus === 'connected' ? 'active' : ''} ${connectionStatus === 'connected' ? 'completed' : ''}`}>
+              <div className="stage-icon">⚙️</div>
+              <div className="stage-label">Initializing</div>
+            </div>
+            <div className={`stage ${connectionStatus === 'connecting' || connectionStatus === 'connected' ? 'active' : ''} ${connectionStatus === 'connected' ? 'completed' : ''}`}>
+              <div className="stage-icon">🌐</div>
+              <div className="stage-label">Connecting</div>
+            </div>
+            <div className={`stage ${connectionStatus === 'connected' ? 'active completed' : ''}`}>
+              <div className="stage-icon">✨</div>
+              <div className="stage-label">Ready</div>
+            </div>
+          </div>
+          
+          <p className="connection-status">
+            {connectionStatus === 'initializing' && 'Starting up...'}
+            {connectionStatus === 'connecting' && 'Connecting to server...'}
+            {connectionStatus === 'connected' && 'Connected!'}
+            {connectionStatus === 'failed' && `Connection failed. Attempting to reconnect... (${connectionAttempts}/10)`}
+          </p>
+          
           <div className="loading-spinner"></div>
+          
+          {connectionStatus === 'failed' && (
+            <button 
+              className="retry-btn"
+              onClick={() => window.location.reload()}
+            >
+              Retry Connection
+            </button>
+          )}
         </div>
       </div>
     );
