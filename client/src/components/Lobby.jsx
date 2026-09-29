@@ -41,7 +41,7 @@ function Lobby({ onCreateGame, onJoinGame, error, setError }) {
         📜 Rules
       </button>
       
-      <div className="lobby-content">
+      <div className="lobby-content lobby-card">
         <div className="lobby-header">
           <h1>CATAN</h1>
           <p className="subtitle">Online Multiplayer</p>

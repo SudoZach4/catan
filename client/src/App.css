@@ -2,6 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .loading-screen {
@@ -9,35 +11,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background:
+    radial-gradient(circle at center, rgba(212, 169, 66, 0.12), transparent 35%),
+    linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #120f0d 100%);
+  padding: 2rem;
 }
 
 .loading-content {
   text-align: center;
+  padding: 2.5rem 3rem;
+  background: rgba(33, 28, 24, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: var(--shadow-strong);
+  backdrop-filter: blur(8px);
+  max-width: 620px;
+  width: min(90vw, 620px);
 }
 
 .loading-content h1 {
-  font-size: 4rem;
-  color: var(--accent-gold);
-  text-shadow: 0 0 20px rgba(212, 169, 66, 0.5);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  color: var(--accent-gold-soft);
+  text-shadow: 0 0 25px rgba(212, 169, 66, 0.5), 0 0 50px rgba(212, 169, 66, 0.25);
   margin-bottom: 1rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.28em;
 }
 
 .loading-content p {
   color: var(--text-secondary);
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  opacity: 0.95;
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid var(--border-color);
-  border-top-color: var(--accent-gold);
+  width: 58px;
+  height: 58px;
+  border: 3px solid rgba(255,255,255,0.08);
+  border-top-color: var(--accent-gold-soft);
+  border-right-color: var(--accent-copper-soft);
   border-radius: 50%;
   margin: 0 auto;
   animation: spin 1s linear infinite;
+  box-shadow: 0 0 18px rgba(212, 169, 66, 0.35);
 }
 
 @keyframes spin {
@@ -46,48 +62,52 @@
 
 .notifications {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 22px;
+  right: 22px;
   z-index: 999999;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  pointer-events: none;
 }
 
 .notification {
-  background: linear-gradient(135deg, #2a2420, #3a3430);
-  border: 2px solid #d4a942;
-  border-radius: 8px;
-  padding: 12px 20px;
-  color: #f4e4c8;
-  font-weight: 500;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  max-width: 320px;
-  animation: slideIn 0.3s ease-out;
+  background: linear-gradient(135deg, rgba(40, 33, 27, 0.96), rgba(58, 48, 42, 0.96));
+  border: 1px solid rgba(212, 169, 66, 0.7);
+  border-radius: 12px;
+  padding: 12px 18px;
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  max-width: min(340px, calc(100vw - 40px));
+  animation: slideIn 0.25s ease-out;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(100px);
+    transform: translateX(22px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
   }
 }
 
 /* Server Full Screen */
 .server-full .loading-content h2 {
-  color: #ff6b6b;
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+  color: #ff9d9d;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  margin-bottom: 0.6rem;
 }
 
 .server-full-icon {
   font-size: 4rem;
   margin-bottom: 1rem;
   animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 135, 135, 0.3));
 }
 
 @keyframes bounce {
@@ -102,20 +122,19 @@
 }
 
 .retry-btn {
-  background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper));
+  background: linear-gradient(135deg, var(--accent-gold-soft), var(--accent-copper-soft));
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 1rem 2rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--bg-primary);
+  font-weight: 700;
+  color: #1f1a17;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(212, 169, 66, 0.3);
+  box-shadow: 0 10px 30px rgba(212, 169, 66, 0.35);
 }
 
 .retry-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 169, 66, 0.4);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 12px 35px rgba(212, 169, 66, 0.5);
 }
 

@@ -31,6 +31,18 @@ const DEV_CARD_INFO = {
     icon: '💰',
     description: 'Name a resource. All players give you all their cards of that type.',
     playable: true
+  },
+  resourceBoost: {
+    name: 'Resource Boost',
+    icon: '✨',
+    description: 'Choose 1 resource and gain 2 of it from the bank.',
+    playable: true
+  },
+  tradingPost: {
+    name: 'Trading Post',
+    icon: '🏪',
+    description: 'Gain 1 brick and 1 lumber immediately.',
+    playable: true
   }
 };
 
@@ -51,15 +63,15 @@ function DevCardModal({ socket, myPlayer, isMyTurn, turnPhase, yearOfPlentyPicks
   const canPlay = isMyTurn && (turnPhase === 'roll' || turnPhase === 'main');
 
   const handlePlayCard = (cardType) => {
-    if (cardType === 'monopoly') {
-      setSelectedCard('monopoly');
+    if (cardType === 'monopoly' || cardType === 'resourceBoost') {
+      setSelectedCard(cardType);
       return;
     }
 
     socket.emit('playDevCard', { cardType, params: {} }, (response) => {
       if (response.success) {
         addNotification(`Played ${DEV_CARD_INFO[cardType].name}!`);
-        if (cardType === 'knight' || cardType === 'roadBuilding') {
+        if (cardType === 'knight' || cardType === 'roadBuilding' || cardType === 'tradingPost') {
           onClose();
         }
       } else {
@@ -68,18 +80,20 @@ function DevCardModal({ socket, myPlayer, isMyTurn, turnPhase, yearOfPlentyPicks
     });
   };
 
-  const handleMonopoly = () => {
+  const handleResourceCard = () => {
     if (!monopolyResource) {
       addNotification('Select a resource');
       return;
     }
 
-    socket.emit('playDevCard', { 
-      cardType: 'monopoly', 
-      params: { resource: monopolyResource } 
+    const cardType = selectedCard;
+    socket.emit('playDevCard', {
+      cardType,
+      params: { resource: monopolyResource }
     }, (response) => {
       if (response.success) {
-        addNotification(`Monopoly on ${monopolyResource}!`);
+        const name = DEV_CARD_INFO[cardType].name;
+        addNotification(`${name} on ${monopolyResource}!`);
         onClose();
       } else {
         addNotification(response.error);
@@ -129,10 +143,10 @@ function DevCardModal({ socket, myPlayer, isMyTurn, turnPhase, yearOfPlentyPicks
           </div>
         )}
 
-        {/* Monopoly resource selection */}
-        {selectedCard === 'monopoly' && (
+        {/* Resource-based card selection */}
+        {(selectedCard === 'monopoly' || selectedCard === 'resourceBoost') && (
           <div className="monopoly-picker">
-            <h3>Choose resource to monopolize</h3>
+            <h3>{selectedCard === 'monopoly' ? 'Choose resource to monopolize' : 'Choose resource for Resource Boost'}</h3>
             <div className="resource-buttons">
               {RESOURCES.map(r => (
                 <button
@@ -147,7 +161,7 @@ function DevCardModal({ socket, myPlayer, isMyTurn, turnPhase, yearOfPlentyPicks
             </div>
             <div className="monopoly-actions">
               <button onClick={() => setSelectedCard(null)}>Cancel</button>
-              <button className="confirm" onClick={handleMonopoly}>Confirm</button>
+              <button className="confirm" onClick={handleResourceCard}>Confirm</button>
             </div>
           </div>
         )}

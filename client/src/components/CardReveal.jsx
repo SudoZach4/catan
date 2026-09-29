@@ -36,6 +36,20 @@ const DEV_CARD_INFO = {
     description: 'Name 1 resource. All other players must give you ALL of their cards of that type.',
     color: '#9932cc',
     bgGradient: 'linear-gradient(135deg, #6a1b9a 0%, #9932cc 50%, #ba55d3 100%)'
+  },
+  resourceBoost: {
+    name: 'Resource Boost',
+    icon: '✨',
+    description: 'Choose 1 resource and gain 2 of it from the bank.',
+    color: '#4ecdc4',
+    bgGradient: 'linear-gradient(135deg, #1b7f7a 0%, #4ecdc4 50%, #8fe3dc 100%)'
+  },
+  tradingPost: {
+    name: 'Trading Post',
+    icon: '🏪',
+    description: 'Gain 1 brick and 1 lumber to strengthen your settlement network.',
+    color: '#f7b267',
+    bgGradient: 'linear-gradient(135deg, #c96a1a 0%, #f7b267 50%, #ffd9a0 100%)'
   }
 };
 

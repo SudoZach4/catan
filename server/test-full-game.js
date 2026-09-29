@@ -153,16 +153,18 @@ async function runTests() {
   assert(devCardCounts.monopoly === 2, 'Deck has 2 monopoly');
 
   const extendedGame = GameLogic.createGame('extended-game-123', hostPlayer, true);
-  assert(extendedGame.devCardDeck.length === 34, 'Extended game deck has 34 cards');
+  assert(extendedGame.devCardDeck.length === 60, 'Extended game deck has 60 cards');
   const extendedCounts = {};
   extendedGame.devCardDeck.forEach(c => {
     extendedCounts[c] = (extendedCounts[c] || 0) + 1;
   });
-  assert(extendedCounts.knight === 18, 'Extended deck has 18 knights');
-  assert(extendedCounts.victoryPoint === 7, 'Extended deck has 7 victory points');
-  assert(extendedCounts.roadBuilding === 3, 'Extended deck has 3 road building');
-  assert(extendedCounts.yearOfPlenty === 3, 'Extended deck has 3 year of plenty');
-  assert(extendedCounts.monopoly === 3, 'Extended deck has 3 monopoly');
+  assert(extendedCounts.knight === 10, 'Extended deck has 10 knights');
+  assert(extendedCounts.victoryPoint === 5, 'Extended deck has 5 victory points');
+  assert(extendedCounts.roadBuilding === 4, 'Extended deck has 4 road building');
+  assert(extendedCounts.yearOfPlenty === 4, 'Extended deck has 4 year of plenty');
+  assert(extendedCounts.monopoly === 4, 'Extended deck has 4 monopoly');
+  assert(extendedCounts.resourceBoost === 4, 'Extended deck has 4 resource boosts');
+  assert(extendedCounts.tradingPost === 4, 'Extended deck has 4 trading posts');
 
   logSubSection('Ports');
   assert(game.ports && game.ports.length === 9, 'Board has 9 ports');

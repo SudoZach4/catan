@@ -522,7 +522,7 @@ function GameBoard({ socket, gameState, playerId, gameCode, chatMessages, onLeav
         </div>
 
         {/* Center - Board */}
-        <div className="board-container">
+        <div className="board-container board-frame">
           <HexBoard 
             hexes={gameState.hexes}
             vertices={gameState.vertices}

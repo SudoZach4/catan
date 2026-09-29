@@ -69,7 +69,9 @@ export const DEV_CARDS = {
   VICTORY_POINT: 'victoryPoint',
   ROAD_BUILDING: 'roadBuilding',
   YEAR_OF_PLENTY: 'yearOfPlenty',
-  MONOPOLY: 'monopoly'
+  MONOPOLY: 'monopoly',
+  RESOURCE_BOOST: 'resourceBoost',
+  TRADING_POST: 'tradingPost'
 };
 
 /** 
@@ -84,13 +86,18 @@ const DEV_CARD_DISTRIBUTION = [
   ...Array(2).fill(DEV_CARDS.MONOPOLY)
 ];
 
-/** Additional development cards for a 5-6 player extension game */
+/**
+ * Additional development cards for a 5-6 player extension game.
+ * Adds a few bonus card types while keeping the standard deck and ratios intact.
+ */
 const EXTRA_DEV_CARD_DISTRIBUTION = [
-  ...Array(4).fill(DEV_CARDS.KNIGHT),
-  ...Array(2).fill(DEV_CARDS.VICTORY_POINT),
-  ...Array(1).fill(DEV_CARDS.ROAD_BUILDING),
-  ...Array(1).fill(DEV_CARDS.YEAR_OF_PLENTY),
-  ...Array(1).fill(DEV_CARDS.MONOPOLY)
+  ...Array(10).fill(DEV_CARDS.KNIGHT),
+  ...Array(5).fill(DEV_CARDS.VICTORY_POINT),
+  ...Array(4).fill(DEV_CARDS.ROAD_BUILDING),
+  ...Array(4).fill(DEV_CARDS.YEAR_OF_PLENTY),
+  ...Array(4).fill(DEV_CARDS.MONOPOLY),
+  ...Array(4).fill(DEV_CARDS.RESOURCE_BOOST),
+  ...Array(4).fill(DEV_CARDS.TRADING_POST)
 ];
 
 /** Player colors: Red, Blue, Orange, Teal, Green, Purple (supports up to 6 players) */
@@ -1529,7 +1536,7 @@ export function playDevCard(game, playerId, cardType, params = {}) {
     return { success: false, error: 'This development card cannot be played' };
   }
 
-  if (cardType === DEV_CARDS.MONOPOLY && !Object.values(RESOURCES).includes(params?.resource)) {
+  if ((cardType === DEV_CARDS.MONOPOLY || cardType === DEV_CARDS.RESOURCE_BOOST) && !Object.values(RESOURCES).includes(params?.resource)) {
     return { success: false, error: 'Must specify a valid resource' };
   }
   
@@ -1567,6 +1574,15 @@ export function playDevCard(game, playerId, cardType, params = {}) {
         }
       });
       player.resources[params.resource] += totalStolen;
+      break;
+
+    case DEV_CARDS.RESOURCE_BOOST:
+      player.resources[params.resource] += 2;
+      break;
+
+    case DEV_CARDS.TRADING_POST:
+      player.resources.brick += 1;
+      player.resources.lumber += 1;
       break;
       
     case DEV_CARDS.VICTORY_POINT:
