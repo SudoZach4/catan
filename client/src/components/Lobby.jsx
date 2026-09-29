@@ -2,6 +2,30 @@ import { useState } from 'react';
 import RulesModal from './RulesModal';
 import './Lobby.css';
 
+const EXPANSIONS = [
+  {
+    id: 'cities-knights',
+    name: 'Cities & Knights',
+    icon: '⚔️',
+    description: 'Add city improvements, knights, and development cards for deeper strategy',
+    color: '#8B4513'
+  },
+  {
+    id: 'seafarers',
+    name: 'Seafarers',
+    icon: '⛵',
+    description: 'Explore new islands, build ships, and navigate uncharted waters',
+    color: '#4169E1'
+  },
+  {
+    id: 'traders-barbarians',
+    name: 'Traders & Barbarians',
+    icon: '🏪',
+    description: 'Trade freely, defend against barbarian invasions, and unlock special abilities',
+    color: '#DAA520'
+  }
+];
+
 function Lobby({ onCreateGame, onJoinGame, error, setError }) {
   const [mode, setMode] = useState(null); // null, 'create', 'join'
   const [playerName, setPlayerName] = useState('');
@@ -9,6 +33,15 @@ function Lobby({ onCreateGame, onJoinGame, error, setError }) {
   const [showRules, setShowRules] = useState(false);
   const [isExtended, setIsExtended] = useState(false);
   const [enableSpecialBuild, setEnableSpecialBuild] = useState(true);
+  const [selectedExpansions, setSelectedExpansions] = useState([]);
+
+  const toggleExpansion = (expansionId) => {
+    setSelectedExpansions(prev => 
+      prev.includes(expansionId) 
+        ? prev.filter(id => id !== expansionId)
+        : [...prev, expansionId]
+    );
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,7 +52,7 @@ function Lobby({ onCreateGame, onJoinGame, error, setError }) {
     }
     
     if (mode === 'create') {
-      onCreateGame(playerName.trim(), isExtended, enableSpecialBuild);
+      onCreateGame(playerName.trim(), isExtended, enableSpecialBuild, selectedExpansions);
     } else if (mode === 'join') {
       if (!gameCode.trim()) {
         setError('Please enter a game code');
@@ -70,7 +103,7 @@ function Lobby({ onCreateGame, onJoinGame, error, setError }) {
             <button 
               type="button" 
               className="back-btn"
-              onClick={() => { setMode(null); setError(null); }}
+              onClick={() => { setMode(null); setError(null); setSelectedExpansions([]); }}
             >
               ← Back
             </button>
@@ -132,6 +165,33 @@ function Lobby({ onCreateGame, onJoinGame, error, setError }) {
                     </label>
                   </div>
                 )}
+
+                {/* Expansions Selection */}
+                <div className="form-group expansions-group">
+                  <label>🗺️ Expansions (Optional)</label>
+                  <p className="expansions-hint">Select expansions to add to your game</p>
+                  <div className="expansions-grid">
+                    {EXPANSIONS.map(expansion => (
+                      <button
+                        key={expansion.id}
+                        type="button"
+                        className={`expansion-card ${selectedExpansions.includes(expansion.id) ? 'selected' : ''}`}
+                        onClick={() => toggleExpansion(expansion.id)}
+                        style={{
+                          borderColor: selectedExpansions.includes(expansion.id) ? expansion.color : '#ddd',
+                          backgroundColor: selectedExpansions.includes(expansion.id) ? `${expansion.color}15` : '#fff'
+                        }}
+                      >
+                        <div className="expansion-icon">{expansion.icon}</div>
+                        <div className="expansion-name">{expansion.name}</div>
+                        <div className="expansion-desc">{expansion.description}</div>
+                        {selectedExpansions.includes(expansion.id) && (
+                          <div className="expansion-checkmark">✓</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </>
             )}
             
