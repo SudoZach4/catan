@@ -676,8 +676,53 @@ function testCoordinateSystem() {
 // =============================================================================
 function testDevCardRules() {
   logSection('5. DEVELOPMENT CARD RULES');
+
+  logSubSection('5.1 Buying Cards Uses Deck and Charges Resources');
+  {
+    const game = createTestGame();
+    game.phase = 'playing';
+    game.turnPhase = 'main';
+    game.currentPlayerIndex = 0;
+    const player = game.players[0];
+    player.resources = { brick: 0, lumber: 0, wool: 1, grain: 1, ore: 1 };
+    game.devCardDeck = ['knight'];
+
+    const result = GameLogic.buyDevCard(game, player.id);
+    assert(result.success && result.card === 'knight', 'Bought the card at the top of the deck');
+    assert(game.devCardDeck.length === 0 && player.newDevCards[0] === 'knight', 'Card left the deck and entered newDevCards');
+    assert(player.resources.wool === 0 && player.resources.grain === 0 && player.resources.ore === 0, 'Purchase cost was deducted');
+
+    player.resources = { brick: 0, lumber: 0, wool: 1, grain: 1, ore: 1 };
+    const emptyDeckResult = GameLogic.buyDevCard(game, player.id);
+    assert(!emptyDeckResult.success, 'Cannot buy when the deck is empty');
+    assert(player.resources.wool === 1 && player.resources.grain === 1 && player.resources.ore === 1, 'Failed purchase leaves resources unchanged');
+  }
+
+  logSubSection('5.2 Production Awards Resources Through Dice Roll');
+  {
+    const game = createTestGame();
+    game.phase = 'playing';
+    game.turnPhase = 'roll';
+    game.currentPlayerIndex = 0;
+    game.hexes['0,0'] = { q: 0, r: 0, terrain: 'forest', resource: 'lumber', number: 2 };
+    game.robber = '9,9';
+    game.vertices['v_0_0_0'] = { building: 'settlement', owner: 0 };
+
+    const originalRandom = Math.random;
+    let result;
+    try {
+      Math.random = () => 0;
+      result = GameLogic.rollDice(game, game.players[0].id);
+    } finally {
+      Math.random = originalRandom;
+    }
+
+    assert(result.success && result.roll.total === 2, 'Rolled the configured resource number');
+    assert(game.players[0].resources.lumber === 1, 'Real dice-roll path added a resource card');
+    assert(result.resourceGains[0].lumber === 1, 'Dice-roll result reports the resource gain');
+  }
   
-  logSubSection('5.1 Only One Dev Card Per Turn');
+  logSubSection('5.3 Only One Dev Card Per Turn');
   {
     const game = createTestGame();
     game.phase = 'playing';
@@ -701,7 +746,7 @@ function testDevCardRules() {
     }
   }
   
-  logSubSection('5.2 Cannot Play Card Bought This Turn');
+  logSubSection('5.4 Cannot Play Card Bought This Turn');
   {
     const game = createTestGame();
     game.phase = 'playing';
@@ -715,6 +760,29 @@ function testDevCardRules() {
     const result = GameLogic.playDevCard(game, 'p1', 'knight', { hexKey: 'h_0_0' });
     
     assert(!result.success, 'Cannot play card bought this turn');
+  }
+
+  logSubSection('5.5 Invalid Plays Do Not Consume Cards');
+  {
+    const game = createTestGame();
+    game.phase = 'playing';
+    game.turnPhase = 'main';
+    game.currentPlayerIndex = 0;
+    const player = game.players[0];
+    player.developmentCards = ['monopoly', 'victoryPoint'];
+
+    const missingResourceResult = GameLogic.playDevCard(game, player.id, 'monopoly');
+    assert(!missingResourceResult.success, 'Monopoly requires a valid resource');
+    assert(player.developmentCards.includes('monopoly') && !game.devCardPlayedThisTurn, 'Failed Monopoly play leaves the card and turn state unchanged');
+
+    const invalidCardResult = GameLogic.playDevCard(game, player.id, 'victoryPoint');
+    assert(!invalidCardResult.success, 'Victory point cards cannot be played');
+    assert(player.developmentCards.includes('victoryPoint'), 'Rejected card remains in the player hand');
+
+    game.yearOfPlentyPicks = 2;
+    const invalidPickResult = GameLogic.yearOfPlentyPick(game, player.id, 'gold');
+    assert(!invalidPickResult.success && game.yearOfPlentyPicks === 2, 'Invalid resource pick leaves picks unchanged');
+    assert(player.resources.gold === undefined, 'Invalid resource pick does not add an unknown resource');
   }
 }
 

@@ -84,6 +84,15 @@ const DEV_CARD_DISTRIBUTION = [
   ...Array(2).fill(DEV_CARDS.MONOPOLY)
 ];
 
+/** Additional development cards for a 5-6 player extension game */
+const EXTRA_DEV_CARD_DISTRIBUTION = [
+  ...Array(4).fill(DEV_CARDS.KNIGHT),
+  ...Array(2).fill(DEV_CARDS.VICTORY_POINT),
+  ...Array(1).fill(DEV_CARDS.ROAD_BUILDING),
+  ...Array(1).fill(DEV_CARDS.YEAR_OF_PLENTY),
+  ...Array(1).fill(DEV_CARDS.MONOPOLY)
+];
+
 /** Player colors: Red, Blue, Orange, Teal, Green, Purple (supports up to 6 players) */
 export const PLAYER_COLORS = ['#e63946', '#457b9d', '#f4a261', '#2a9d8f', '#6a994e', '#9d4edd'];
 
@@ -719,9 +728,9 @@ export function createGame(gameId, hostPlayer, isExtended = false, enableSpecial
   const PORT_POSITIONS = isExtended ? PORT_POSITIONS_EXTENDED : PORT_POSITIONS_STANDARD;
   const MAX_PLAYERS = isExtended ? 6 : 4;
   
-  // Extended game has more development cards
-  const devCards = isExtended 
-    ? [...DEV_CARD_DISTRIBUTION, ...DEV_CARD_DISTRIBUTION.slice(0, 9)] // Add 9 more cards (34 total)
+  // Extended game has more development cards while keeping the base distribution proportional
+  const devCards = isExtended
+    ? [...DEV_CARD_DISTRIBUTION, ...EXTRA_DEV_CARD_DISTRIBUTION]
     : [...DEV_CARD_DISTRIBUTION];
   
   // Shuffle terrain and numbers
@@ -1515,6 +1524,14 @@ export function playDevCard(game, playerId, cardType, params = {}) {
   }
   
   const player = game.players[playerIndex];
+
+  if (!Object.values(DEV_CARDS).includes(cardType) || cardType === DEV_CARDS.VICTORY_POINT) {
+    return { success: false, error: 'This development card cannot be played' };
+  }
+
+  if (cardType === DEV_CARDS.MONOPOLY && !Object.values(RESOURCES).includes(params?.resource)) {
+    return { success: false, error: 'Must specify a valid resource' };
+  }
   
   // Can't play cards bought this turn (except VP which is auto-played)
   const cardIndex = player.developmentCards.indexOf(cardType);
@@ -1541,9 +1558,6 @@ export function playDevCard(game, playerId, cardType, params = {}) {
       break;
       
     case DEV_CARDS.MONOPOLY:
-      if (!params.resource) {
-        return { success: false, error: 'Must specify a resource' };
-      }
       // Take all of that resource from other players
       let totalStolen = 0;
       game.players.forEach((p, idx) => {
@@ -1574,6 +1588,10 @@ export function yearOfPlentyPick(game, playerId, resource) {
   
   if (game.currentPlayerIndex !== playerIndex) {
     return { success: false, error: 'Not your turn' };
+  }
+
+  if (!Object.values(RESOURCES).includes(resource)) {
+    return { success: false, error: 'Invalid resource' };
   }
   
   if (game.yearOfPlentyPicks <= 0) {
